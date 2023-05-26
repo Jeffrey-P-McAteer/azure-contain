@@ -15,9 +15,8 @@ pub struct ContainerBlock {
   
   // Where data is on disk
   pub btrfs_partuuid: String,
-  pub btrfs_subvolume: usize,
-
-  // Where it gets mounted
+  
+  // Where it gets mounted; the tool will ensure disk_path.parent() == mountpoint of btrfs_partuuid
   pub disk_path: PathBuf,
 
 
@@ -30,6 +29,9 @@ impl ContainerBlock {
     file_name.push( &std::ffi::OsStr::new(flag) );
     flag_file_path.set_file_name(file_name);
     flag_file_path
+  }
+  pub fn get_disk_part_path(&self) -> String {
+    format!("/dev/disk/by-partuuid/{}", self.btrfs_partuuid)
   }
 }
 

@@ -9,10 +9,9 @@ tokio = {version = "1.28", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.7"
 filetime = "0.2"
-reqwest = { version = "0.11", features = ["default", "stream"] }
 once_cell = "1.17"
 nix = "0.26"
-qapi = { version = "0.13", features = [ "qmp", "qga", "async-tokio-all" ] }
+mountinfo = "0.2"
 
 
 [profile.release]
