@@ -75,17 +75,18 @@ async fn container_manager(path_to_config: &str) {
 
       let mut container_root_has_files = false;
       let mut container_root_fs_dir_o = dump_error_and_ret!( tokio::fs::read_dir(&container_root_dir).await );
-      while let Some(child) = dump_error_and_ret!( container_root_fs_dir_o.next_entry().await ) {
+      while let Some(_child) = dump_error_and_ret!( container_root_fs_dir_o.next_entry().await ) {
         container_root_has_files = true;
       }
 
       println!("container_root_dir = {}", container_root_dir.display());
 
+      let ref_to_container_root_dir = container_root_dir.to_string_lossy();
+
       let install_completed_flag = std::path::PathBuf::from(&parent_disk_mount_pt).join( &container_config.flag_path(".install-completed") );
       if !container_root_has_files || !install_completed_flag.exists() {
         // Run all install commands as root
         let mut install_cmd_vars: std::collections::HashMap<&str, &str> = std::collections::HashMap::new();
-        let ref_to_container_root_dir = container_root_dir.to_string_lossy();
         install_cmd_vars.insert("container_root_dir", &ref_to_container_root_dir);
 
         for command_str in container_config.install_setup_cmds.iter() {
@@ -104,9 +105,23 @@ async fn container_manager(path_to_config: &str) {
 
       println!("{} exists, booting!", install_completed_flag.display());
 
-      // TODO boot container
+      let mut args: Vec<&str> = vec![];
+      args.push("-n"); // for sudo
+
+      args.push("systemd-nspawn"); // begin nspawn command
+      args.push("-D");
+      args.push(&ref_to_container_root_dir);
 
 
+      let container_cmd_s = args.join(" ");
+      println!("[Run Cmd] {}", container_cmd_s);
+
+      dump_error!(
+        tokio::process::Command::new("sudo")
+          .args(&args)
+          .status()
+          .await
+      );
     }
   }
 }
