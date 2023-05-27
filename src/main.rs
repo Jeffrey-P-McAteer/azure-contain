@@ -59,7 +59,7 @@ async fn container_manager(path_to_config: &str) {
   // We don't really use outer layer much
   let container_config = container_config.container;
   
-  println!("container_config={:?}", container_config);
+  // println!("container_config={:?}", container_config);
 
   // Check if container_config.btrfs_partuuid is mounted, if not exit!
   match get_mount_pt_of( &container_config.get_disk_part_path() ).await {
@@ -141,6 +141,15 @@ async fn container_manager(path_to_config: &str) {
       }
 
       for nspawn_addtl_arg in container_config.nspawn_addtl_args.iter() {
+        // Skip --bind args to files which do not exist (such as /dev/nvidia0)
+        if nspawn_addtl_arg.contains("--bind=") && nspawn_addtl_arg.contains("=") {
+          let host_path = nspawn_addtl_arg.split("=").collect::<Vec<&str>>()[1];
+          let host_path = host_path.split(":").collect::<Vec<&str>>()[0];
+          if ! std::path::PathBuf::from(host_path).exists() {
+            println!("Ignoring arg {} because {} does not exist!", &nspawn_addtl_arg, &host_path);
+            continue;
+          }
+        }
         args.push(nspawn_addtl_arg.to_string());
       }
 
