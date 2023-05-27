@@ -47,7 +47,8 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
 
   # Addtl stuff for input adjustments
-  "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
+  "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
+  "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
 
 
 ]
@@ -61,7 +62,7 @@ nspawn_addtl_args = [
   "--bind=/dev/dri",
   "--bind=/tmp",
   "--bind=/dev/nvidia0",
-  "--bind=/tmp",
+  "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
   "--user=steam", # exec as steam user we setup before, we expect it's ID to match our GUI user's ID (1000)
   "--"
 ]
