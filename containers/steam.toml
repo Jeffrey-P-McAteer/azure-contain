@@ -36,10 +36,11 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
   
   # Now install packages!
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa steam sudo vim",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd steam steam-native-runtime ",
 
   # Setup user 'steam'
   "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel steam",
+  "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
 
 
 ]
