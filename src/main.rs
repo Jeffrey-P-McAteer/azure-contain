@@ -1,4 +1,7 @@
 
+#![allow(dead_code)]
+#![allow(unused_imports)]
+
 use tokio::io::AsyncBufReadExt;
 use tokio::io::AsyncWriteExt;
 
@@ -57,10 +60,6 @@ async fn container_manager(path_to_config: &str) {
   
   println!("container_config={:?}", container_config);
 
-  if ! container_config.disk_path.exists() {
-    dump_error!( tokio::fs::create_dir_all(&container_config.disk_path).await );
-  }
-
   // Check if container_config.btrfs_partuuid is mounted, if not exit!
   match get_mount_pt_of( &container_config.get_disk_part_path() ).await {
     None => {
@@ -68,14 +67,16 @@ async fn container_manager(path_to_config: &str) {
       return;
     }
     Some(container_disk_mount_pt) => {
-      
-      println!("container_disk_mount_pt = {:?}", container_disk_mount_pt);
+      let container_root_dir = std::path::PathBuf::from(container_disk_mount_pt).join(container_config.part_subfolder);
+      if ! container_root_dir.exists() {
+        dump_error!( tokio::fs::create_dir_all(&container_root_dir).await );
+      }
+
+      println!("container_root_dir = {:?}", container_root_dir);
+
 
     }
   }
-
-
-
 }
 
 

@@ -2,10 +2,15 @@
 [container]
 name = "Steam"
 
-btrfs_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
+# Internal sd disk
+#disk_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
 
-# The tool will have to ensure btrfs_partuuid is mounted at the directory above this one.
-disk_path = "/tmp/containers/steam"
+# external scratch disk
+disk_partuuid = "e08214f5-cfc5-4252-afee-505dfcd23808"
+
+# The tool looks up the mount point for disk_partuuid and adds this to the mount location.
+# Disks must be mounted separately from azure-contain.
+part_subfolder = "containers/steam"
 
 
 
