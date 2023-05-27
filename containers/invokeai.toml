@@ -1,22 +1,20 @@
 
 [container]
-name = "steam"
+name = "invokeai"
 
 welcome_msg = '''
+Run once
+  > invokeai-configure
 Run
-  > steam-native
+  > invokeai --web --host 127.0.0.1
+and open a browser to http://localhost:9090
 
 '''
-
-# Internal sd disk
-#disk_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
 
 # external scratch disk
 disk_partuuid = "e08214f5-cfc5-4252-afee-505dfcd23808"
 
-# The tool looks up the mount point for disk_partuuid and adds this to the mount location.
-# Disks must be mounted separately from azure-contain.
-part_subfolder = "containers/steam"
+part_subfolder = "containers/invokeai"
 
 # If root FS is empty or install flag missing, all of these are run as root.
 install_setup_cmds = [
@@ -42,16 +40,21 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
   
   # Now install packages!
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd steam steam-native-runtime ",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel python python-pip ",
 
-  # Setup user 'steam'
-  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel steam",
+  # Setup user 'user'
+  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
   "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
 
-  # Addtl stuff for input adjustments
-  "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
-  "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
+  # We need python 3.10 which is in the AUR
+  "SH_IN_CONTAINER: cd /opt ; git clone https://aur.archlinux.org/yay-git.git ; chown -R user:user /opt/yay-git",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"cd /opt/yay-git ; makepkg -si --noconfirm \"",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm python310 \"",
+  "SH_IN_CONTAINER: rm /usr/bin/python3 ; ln -s /usr/bin/python3.10 /usr/bin/python3 ",
 
+  # Finally install InvokeAI
+  "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
+  "SH_IN_CONTAINER: sudo -u user python -m pip install --user \"InvokeAI[xformers]\" --use-pep517 --extra-index-url https://download.pytorch.org/whl/cu117",
 
 ]
 
@@ -64,13 +67,12 @@ nspawn_addtl_args = [
   "--bind=/dev/dri",
   "--bind=/tmp",
   "--bind=/dev/nvidia0",
-  "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
-  "--user=steam", # exec as steam user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  "--user=user", # exec as "user" user we setup before, we expect it's ID to match our GUI user's ID (1000)
   "--"
 ]
 
 fwd_env_vars = [
-  "DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS", "XDG_VTNR", "XDG_SESSION_ID"
+  
 ]
 
 
