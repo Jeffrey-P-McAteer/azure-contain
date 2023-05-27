@@ -21,6 +21,10 @@ pub struct ContainerBlock {
 
   pub install_setup_cmds: Vec<String>,
 
+  pub nspawn_addtl_args: Vec<String>,
+
+  pub fwd_env_vars: Vec<String>,
+
 }
 
 impl ContainerBlock {

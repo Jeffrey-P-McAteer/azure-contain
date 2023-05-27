@@ -95,6 +95,7 @@ async fn container_manager(path_to_config: &str) {
             // Easier to handle here than escape in config.toml
             let command_str = command_str.replace("SH_IN_CONTAINER:", "");
             let command = dump_error_and_ret!( SimpleCurlyFormat.format(&command_str, &install_cmd_vars) );
+            let command = command.trim();
 
             println!("[Install Cmd] systemd-nspawn -D \"{}\" sh -c \"{}\"", &ref_to_container_root_dir, &command);
             dump_error_and_ret!(
@@ -106,6 +107,7 @@ async fn container_manager(path_to_config: &str) {
           }
           else {
             let command = dump_error_and_ret!( SimpleCurlyFormat.format(&command_str, &install_cmd_vars) );
+            let command = command.trim();
             println!("[Install Cmd] {}", &command);
             dump_error_and_ret!(
               tokio::process::Command::new("sudo")
@@ -121,16 +123,29 @@ async fn container_manager(path_to_config: &str) {
 
       println!("{} exists, booting!", install_completed_flag.display());
 
-      let mut args: Vec<&str> = vec![];
-      args.push("-n"); // for sudo
+      let mut args: Vec<String> = vec![];
+      args.push("-n".to_string()); // for sudo
 
-      args.push("systemd-nspawn"); // begin nspawn command
-      args.push("-D");
-      args.push(&ref_to_container_root_dir);
+      args.push("systemd-nspawn".to_string()); // begin nspawn command
+      args.push("-D".to_string());
+      args.push(ref_to_container_root_dir.to_string());
 
+      args.push(format!("--machine={}", &container_config.name ));
+      args.push(format!("--hostname={}", &container_config.name ));
+
+      for fwd_env_var in container_config.fwd_env_vars.iter() {
+        if let Ok(var_value) = std::env::var(&fwd_env_var) {
+          let param = format!("--setenv={}={}", fwd_env_var, var_value);
+          args.push(param);
+        }
+      }
+
+      for nspawn_addtl_arg in container_config.nspawn_addtl_args.iter() {
+        args.push(nspawn_addtl_arg.to_string());
+      }
 
       let container_cmd_s = args.join(" ");
-      println!("[Run Cmd] {}", container_cmd_s);
+      println!("[Run Cmd] sudo {}", container_cmd_s);
 
       dump_error!(
         tokio::process::Command::new("sudo")

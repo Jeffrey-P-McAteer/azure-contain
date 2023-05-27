@@ -19,21 +19,42 @@ install_setup_cmds = [
   
   # Arch will need a good mirror list to install packages with
   "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
-  
-  # SH_IN_CONTAINER: pacman-key --init # equivelant used to make argument placement easier
-  "systemd-nspawn -D '{container_root_dir}' pacman-key --init",
-  
-  # Now install util packages!
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils",
 
   # Enable multilib!
   "SH_IN_CONTAINER: echo '[multilib]' >> /etc/pacman.conf",
   "SH_IN_CONTAINER: echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf",
+  # Turn off signature checks
+  "SH_IN_CONTAINER: sed -i \"s/SigLevel.*=.*/SigLevel = Never/g\" /etc/pacman.conf",
 
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm steam ",
+  # Steam needs utf-8 locale
+  "SH_IN_CONTAINER: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen",
+  "SH_IN_CONTAINER: locale-gen",
+  "SH_IN_CONTAINER: echo 'LANG=\"en_US.UTF-8\"' > /etc/locale.conf",
 
+  "SH_IN_CONTAINER: pacman-key --init",
+  "SH_IN_CONTAINER: pacman -S archlinux-keyring",
+  "SH_IN_CONTAINER: pacman -Syu --noconfirm",
   
+  # Now install packages!
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils steam lib32-mesa",
 
+  "SH_IN_CONTAINER: bash",
+
+]
+
+# Used for permissions + folder bind mounts, added after "systemd-nspawn -D /path/to/root"
+nspawn_addtl_args = [
+  "--capability=all",
+  # "--capability=CAP_SYS_ADMIN",
+  "--bind=/run/user/1000:/run/user/1000",
+  "--bind=/var/lib/dbus",
+  "--bind=/dev/dri",
+  "--bind=/tmp",
+  "--"
+]
+
+fwd_env_vars = [
+  "DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS", "XDG_VTNR", "XDG_SESSION_ID"
 ]
 
 
