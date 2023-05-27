@@ -14,9 +14,19 @@ part_subfolder = "containers/steam"
 
 # If root FS is empty or install flag missing, all of these are run as root.
 install_setup_cmds = [
+  # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
   "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.05.03/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
-  # ^ By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
   
+  # Arch will need a good mirror list to install packages with
+  "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
+  "systemd-nspawn -D '{container_root_dir}' pacman-key --init",
+
+  # Now install packages for steam!
+  "systemd-nspawn -D '{container_root_dir}' pacman -Sy --noconfirm mesa-utils",
+
+  #"systemd-nspawn -D '{container_root_dir}' pacman-key --init",
+
+
 ]
 
 
