@@ -12,6 +12,8 @@ pub struct ContainConfig {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ContainerBlock {
   pub name: String,
+
+  pub welcome_msg: String,
   
   // Where data is on disk
   pub disk_partuuid: String,

@@ -147,6 +147,11 @@ async fn container_manager(path_to_config: &str) {
       let container_cmd_s = args.join(" ");
       println!("[Run Cmd] sudo {}", container_cmd_s);
 
+      println!("");
+      println!("{}", &container_config.welcome_msg);
+      println!("");
+      
+
       dump_error!(
         tokio::process::Command::new("sudo")
           .args(&args)

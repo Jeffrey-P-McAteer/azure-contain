@@ -2,6 +2,10 @@
 [container]
 name = "steam"
 
+welcome_msg = '''
+Run steam-native!
+'''
+
 # Internal sd disk
 #disk_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
 
