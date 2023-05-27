@@ -9,6 +9,9 @@ Run
   > invokeai --web --host 127.0.0.1
 and open a browser to http://localhost:9090
 
+Also ensure /home/user/.local/bin is on your PATH
+  > export PATH=$PATH:/home/user/.local/bin
+
 '''
 
 # external scratch disk
