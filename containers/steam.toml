@@ -14,7 +14,9 @@ part_subfolder = "containers/steam"
 
 # If root FS is empty or install flag missing, all of these are run as root.
 install_setup_cmds = [
-  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.05.03/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}'",
+  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.05.03/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
+  # ^ By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
+  
 ]
 
 
