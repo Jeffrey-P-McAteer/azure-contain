@@ -7,6 +7,7 @@ use tokio::io::AsyncWriteExt;
 
 use std::io::Write;
 
+use dynfmt::{Format, SimpleCurlyFormat};
 
 mod structs;
 use structs::*;
@@ -66,13 +67,44 @@ async fn container_manager(path_to_config: &str) {
       println!("Please mount {:?} someplace!", &container_config.get_disk_part_path() );
       return;
     }
-    Some(container_disk_mount_pt) => {
-      let container_root_dir = std::path::PathBuf::from(container_disk_mount_pt).join(container_config.part_subfolder);
+    Some(parent_disk_mount_pt) => {
+      let container_root_dir = std::path::PathBuf::from(&parent_disk_mount_pt).join(&container_config.part_subfolder);
       if ! container_root_dir.exists() {
         dump_error!( tokio::fs::create_dir_all(&container_root_dir).await );
       }
 
-      println!("container_root_dir = {:?}", container_root_dir);
+      let mut container_root_has_files = false;
+      let mut container_root_fs_dir_o = dump_error_and_ret!( tokio::fs::read_dir(&container_root_dir).await );
+      while let Some(child) = dump_error_and_ret!( container_root_fs_dir_o.next_entry().await ) {
+        container_root_has_files = true;
+      }
+
+      println!("container_root_dir = {}", container_root_dir.display());
+
+      let install_completed_flag = std::path::PathBuf::from(&parent_disk_mount_pt).join( &container_config.flag_path(".install-completed") );
+      if !container_root_has_files || !install_completed_flag.exists() {
+        // Run all install commands as root
+        let mut install_cmd_vars: std::collections::HashMap<&str, &str> = std::collections::HashMap::new();
+        let ref_to_container_root_dir = container_root_dir.to_string_lossy();
+        install_cmd_vars.insert("container_root_dir", &ref_to_container_root_dir);
+
+        for command_str in container_config.install_setup_cmds.iter() {
+          let command = dump_error_and_ret!( SimpleCurlyFormat.format(&command_str, &install_cmd_vars) );
+          println!("[Install Cmd] {}", &command);
+          dump_error!(
+            tokio::process::Command::new("sudo")
+              .args(&["-n", "sh", "-c", &command ])
+              .status()
+              .await
+          );
+        }
+
+        dump_error!( tokio::fs::write(&install_completed_flag, "done").await );
+      }
+
+      println!("{} exists, booting!", install_completed_flag.display());
+
+      // TODO boot container
 
 
     }

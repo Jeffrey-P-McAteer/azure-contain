@@ -19,6 +19,7 @@ pub struct ContainerBlock {
   // Where it gets mounted; the tool will ensure part_subfolder.parent() == mountpoint of disk_partuuid
   pub part_subfolder: PathBuf,
 
+  pub install_setup_cmds: Vec<String>,
 
 }
 

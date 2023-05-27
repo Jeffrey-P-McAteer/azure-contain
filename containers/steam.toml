@@ -12,5 +12,9 @@ disk_partuuid = "e08214f5-cfc5-4252-afee-505dfcd23808"
 # Disks must be mounted separately from azure-contain.
 part_subfolder = "containers/steam"
 
+# If root FS is empty or install flag missing, all of these are run as root.
+install_setup_cmds = [
+  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.05.03/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}'",
+]
 
 
