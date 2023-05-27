@@ -90,14 +90,30 @@ async fn container_manager(path_to_config: &str) {
         install_cmd_vars.insert("container_root_dir", &ref_to_container_root_dir);
 
         for command_str in container_config.install_setup_cmds.iter() {
-          let command = dump_error_and_ret!( SimpleCurlyFormat.format(&command_str, &install_cmd_vars) );
-          println!("[Install Cmd] {}", &command);
-          dump_error!(
-            tokio::process::Command::new("sudo")
-              .args(&["-n", "sh", "-c", &command ])
-              .status()
-              .await
-          );
+          if command_str.starts_with("SH_IN_CONTAINER") {
+            // We need to pass the end of this as a bare string to /bin/sh -c within the container.
+            // Easier to handle here than escape in config.toml
+            let command_str = command_str.replace("SH_IN_CONTAINER:", "");
+            let command = dump_error_and_ret!( SimpleCurlyFormat.format(&command_str, &install_cmd_vars) );
+
+            println!("[Install Cmd] systemd-nspawn -D \"{}\" sh -c \"{}\"", &ref_to_container_root_dir, &command);
+            dump_error_and_ret!(
+              tokio::process::Command::new("sudo")
+                .args(&["-n", "systemd-nspawn", "-D", &ref_to_container_root_dir, "sh", "-c", &command])
+                .status()
+                .await
+            );
+          }
+          else {
+            let command = dump_error_and_ret!( SimpleCurlyFormat.format(&command_str, &install_cmd_vars) );
+            println!("[Install Cmd] {}", &command);
+            dump_error_and_ret!(
+              tokio::process::Command::new("sudo")
+                .args(&["-n", "sh", "-c", &command ])
+                .status()
+                .await
+            );
+          }
         }
 
         dump_error!( tokio::fs::write(&install_completed_flag, "done").await );

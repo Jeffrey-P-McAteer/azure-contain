@@ -19,13 +19,20 @@ install_setup_cmds = [
   
   # Arch will need a good mirror list to install packages with
   "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
+  
+  # SH_IN_CONTAINER: pacman-key --init # equivelant used to make argument placement easier
   "systemd-nspawn -D '{container_root_dir}' pacman-key --init",
+  
+  # Now install util packages!
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils",
 
-  # Now install packages for steam!
-  "systemd-nspawn -D '{container_root_dir}' pacman -Sy --noconfirm mesa-utils",
+  # Enable multilib!
+  "SH_IN_CONTAINER: echo '[multilib]' >> /etc/pacman.conf",
+  "SH_IN_CONTAINER: echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf",
 
-  #"systemd-nspawn -D '{container_root_dir}' pacman-key --init",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm steam ",
 
+  
 
 ]
 
