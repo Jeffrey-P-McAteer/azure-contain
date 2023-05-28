@@ -22,20 +22,14 @@ fn main() {
     return dump_help();
   }
   else {
-    let first_arg = &args[1];
+    let first_arg = args[1].clone();
+    let rt = tokio::runtime::Builder::new_multi_thread()
+      .enable_all()
+      .worker_threads(2)
+      .build()
+      .expect("Could not build tokio runtime!");
 
-    if first_arg.ends_with(".toml") {
-      let rt = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .worker_threads(2)
-        .build()
-        .expect("Could not build tokio runtime!");
-
-      return rt.block_on(container_manager(first_arg));
-    }
-    else {
-      println!("TODO build client system to handle arg {}", first_arg);
-    }
+    return rt.block_on(container_manager(first_arg));
   }
 }
 
@@ -52,7 +46,18 @@ fn dump_help() {
 );
 }
 
-async fn container_manager(path_to_config: &str) {
+async fn container_manager(mut path_to_config: String) {
+  if ! std::path::Path::new(&path_to_config).exists() {
+    // Scan under /j/bins/azure-contain/containers for a file containing this & use that
+    let mut containers_dir_o = dump_error_and_ret!( tokio::fs::read_dir("/j/bins/azure-contain/containers").await );
+    while let Some(container_toml) = dump_error_and_ret!( containers_dir_o.next_entry().await ) {
+      if container_toml.file_name().into_string().unwrap_or_default().contains(&path_to_config) {
+        path_to_config = container_toml.path().into_os_string().into_string().unwrap_or_default();
+        break;
+      }
+    }
+  }
+
   println!("Reading {}", &path_to_config);
   let container_file_content = tokio::fs::read_to_string(path_to_config).await.expect("Could not read config file!");
   let container_config: ContainConfig = toml::from_str(&container_file_content).expect("Could not parse config!");
