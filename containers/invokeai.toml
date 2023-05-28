@@ -4,15 +4,41 @@ name = "invokeai"
 
 welcome_msg = '''
 Run once
+  > su user
+  > cd 
   > invokeai-configure
+
 Run
+  > su user
+  > cd 
+  # > export DRI_PRIME=1
+  # > export __NV_PRIME_RENDER_OFFLOAD=1
+  # > export __GLX_VENDOR_LIBRARY_NAME=nvidia
   > invokeai --web --host 127.0.0.1
+
 and open a browser to http://localhost:9090
 
 Also ensure /home/user/.local/bin is on your PATH
   > export PATH=$PATH:/home/user/.local/bin
+  > rsync -av $(find /j/downloads -iname '*.safetensors' -print) /mnt/scratch/containers/invokeai/home/user/addtl-models ; ls -alh /j/downloads /mnt/scratch/containers/invokeai/home/user/addtl-models
+
+Also test for that one .so file we need to replace via
+  
+  > python -c 'from patchmatch import patch_match'
+  > python -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
+
+  > find /home/user/.local/lib/python3.10/site-packages/torch -iname '*libgomp*so*'
+  > cp /path/to/libgomp-a34b3233.so.1 /path/to/_ORIGINAL_libgomp-a34b3233.so.1
+  > rm /path/to/libgomp-a34b3233.so.1
+  > ln -s /usr/lib/libgomp.so.1 /path/to/libgomp-a34b3233.so.1
+
+  > sudo ldconfig
+  > python -m pip install --user torch torchvision torchaudio pypatchmatch
+
 
 '''
+
+runtime_hint = "arch-chroot"
 
 # external scratch disk
 disk_partuuid = "e08214f5-cfc5-4252-afee-505dfcd23808"
@@ -32,6 +58,8 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf",
   # Turn off signature checks
   "SH_IN_CONTAINER: sed -i \"s/SigLevel.*=.*/SigLevel = Never/g\" /etc/pacman.conf",
+  # Turn off space check
+  "SH_IN_CONTAINER: sed -i \"s/^CheckSpace.*/#CheckSpace/g\" /etc/pacman.conf",
 
   # Steam needs utf-8 locale
   "SH_IN_CONTAINER: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen",
@@ -43,7 +71,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
   
   # Now install packages!
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel python python-pip ",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel python python-pip nvidia cuda opencl-nvidia ",
 
   # Setup user 'user'
   "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
@@ -59,23 +87,13 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
   "SH_IN_CONTAINER: sudo -u user python -m pip install --user \"InvokeAI[xformers]\" --use-pep517 --extra-index-url https://download.pytorch.org/whl/cu117",
 
+  # Addtl packages for GPU
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm xf86-video-nouveau stable-diffusion-ui python-opencv opencv \"",
+  "SH_IN_CONTAINER: cd /usr/lib/pkgconfig/ ; ln -sf opencv4.pc opencv.pc ", # For pip install below
+  "SH_IN_CONTAINER: sudo -u user python -m pip install --user torch torchvision torchaudio pypatchmatch",
+
+
 ]
 
-# Used for permissions + folder bind mounts, added after "systemd-nspawn -D /path/to/root"
-nspawn_addtl_args = [
-  "--capability=all",
-  # "--capability=CAP_SYS_ADMIN",
-  "--bind=/run/user/1000:/run/user/1000",
-  "--bind=/var/lib/dbus",
-  "--bind=/dev/dri",
-  "--bind=/tmp",
-  "--bind=/dev/nvidia0",
-  "--user=user", # exec as "user" user we setup before, we expect it's ID to match our GUI user's ID (1000)
-  "--"
-]
-
-fwd_env_vars = [
-  
-]
 
 

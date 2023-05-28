@@ -121,36 +121,50 @@ async fn container_manager(path_to_config: &str) {
         dump_error!( tokio::fs::write(&install_completed_flag, "done").await );
       }
 
-      println!("{} exists, booting!", install_completed_flag.display());
+      println!("{} exists, running with runtime hint {}!", install_completed_flag.display(), &container_config.runtime_hint );
 
       let mut args: Vec<String> = vec![];
       args.push("-n".to_string()); // for sudo
 
-      args.push("systemd-nspawn".to_string()); // begin nspawn command
-      args.push("-D".to_string());
-      args.push(ref_to_container_root_dir.to_string());
+      if container_config.runtime_hint.contains("nspawn") {
+      
+        args.push("systemd-nspawn".to_string()); // begin nspawn command
+        args.push("-D".to_string());
+        args.push(ref_to_container_root_dir.to_string());
 
-      args.push(format!("--machine={}", &container_config.name ));
-      args.push(format!("--hostname={}", &container_config.name ));
+        args.push(format!("--machine={}", &container_config.name ));
+        args.push(format!("--hostname={}", &container_config.name ));
 
-      for fwd_env_var in container_config.fwd_env_vars.iter() {
-        if let Ok(var_value) = std::env::var(&fwd_env_var) {
-          let param = format!("--setenv={}={}", fwd_env_var, var_value);
-          args.push(param);
-        }
-      }
-
-      for nspawn_addtl_arg in container_config.nspawn_addtl_args.iter() {
-        // Skip --bind args to files which do not exist (such as /dev/nvidia0)
-        if nspawn_addtl_arg.contains("--bind=") && nspawn_addtl_arg.contains("=") {
-          let host_path = nspawn_addtl_arg.split("=").collect::<Vec<&str>>()[1];
-          let host_path = host_path.split(":").collect::<Vec<&str>>()[0];
-          if ! std::path::PathBuf::from(host_path).exists() {
-            println!("Ignoring arg {} because {} does not exist!", &nspawn_addtl_arg, &host_path);
-            continue;
+        for fwd_env_var in container_config.fwd_env_vars.iter() {
+          if let Ok(var_value) = std::env::var(&fwd_env_var) {
+            let param = format!("--setenv={}={}", fwd_env_var, var_value);
+            args.push(param);
           }
         }
-        args.push(nspawn_addtl_arg.to_string());
+
+        for nspawn_addtl_arg in container_config.nspawn_addtl_args.iter() {
+          // Skip --bind args to files which do not exist (such as /dev/nvidia0)
+          if nspawn_addtl_arg.contains("--bind=") && nspawn_addtl_arg.contains("=") {
+            let host_path = nspawn_addtl_arg.split("=").collect::<Vec<&str>>()[1];
+            let host_path = host_path.split(":").collect::<Vec<&str>>()[0];
+            if ! std::path::PathBuf::from(host_path).exists() {
+              println!("Ignoring arg {} because {} does not exist!", &nspawn_addtl_arg, &host_path);
+              continue;
+            }
+          }
+          args.push(nspawn_addtl_arg.to_string());
+        }
+      }
+      else if container_config.runtime_hint.contains("arch-chroot")  {
+
+        args.push("arch-chroot".to_string());
+
+        args.push(ref_to_container_root_dir.to_string());
+
+      }
+      else {
+        println!("Unknown runtime hint!");
+        return;
       }
 
       let container_cmd_s = args.join(" ");
