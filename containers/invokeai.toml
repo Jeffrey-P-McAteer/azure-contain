@@ -11,9 +11,6 @@ Run once
 Run
   > su user
   > cd 
-  # > export DRI_PRIME=1
-  # > export __NV_PRIME_RENDER_OFFLOAD=1
-  # > export __GLX_VENDOR_LIBRARY_NAME=nvidia
   > invokeai --web --host 127.0.0.1
 
 and open a browser to http://localhost:9090
@@ -34,7 +31,6 @@ Also test for that one .so file we need to replace via
 
   > sudo ldconfig
   > python -m pip install --user torch torchvision torchaudio pypatchmatch
-
 
 '''
 
