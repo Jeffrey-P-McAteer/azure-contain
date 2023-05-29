@@ -4,9 +4,14 @@ name = "steam"
 
 welcome_msg = '''
 Run
+  > su steam
   > steam-native
+  > steam-native steam://run/440
 
 '''
+
+#runtime_hint = "arch-chroot"
+runtime_hint = "nspawn"
 
 # Internal sd disk
 #disk_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
@@ -31,6 +36,8 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf",
   # Turn off signature checks
   "SH_IN_CONTAINER: sed -i \"s/SigLevel.*=.*/SigLevel = Never/g\" /etc/pacman.conf",
+  # Turn off space check
+  "SH_IN_CONTAINER: sed -i \"s/^CheckSpace.*/#CheckSpace/g\" /etc/pacman.conf",
 
   # Steam needs utf-8 locale
   "SH_IN_CONTAINER: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen",
@@ -52,6 +59,8 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
   "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
 
+  "SH_IN_CONTAINER: pacman -S --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber",
+  
 
 ]
 
@@ -62,6 +71,7 @@ nspawn_addtl_args = [
   "--bind=/run/user/1000:/run/user/1000",
   "--bind=/var/lib/dbus",
   "--bind=/dev/dri",
+  "--bind=/dev/snd",
   "--bind=/tmp",
   "--bind=/dev/nvidia0",
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
