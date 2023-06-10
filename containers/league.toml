@@ -63,10 +63,10 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: su league -c 'leagueoflegends --install'",
 
   # Addtl stuff for input adjustments
-  "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
   "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
 
-  "SH_IN_CONTAINER: pacman -S --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber",
   
 
 ]
