@@ -6,6 +6,7 @@ welcome_msg = '''
 Run
   > su league
   > leagueoflegends [--??]
+  > Wine prefix is /home/league/.local/share/leagueoflegends
 
 '''
 
@@ -63,11 +64,15 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: su league -c 'leagueoflegends install'",
 
   # Addtl stuff for input adjustments
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm xorg-server xorg-xinit mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
   "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
 
   "SH_IN_CONTAINER: pacman -Sy --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber",
   
+  # More work done (see https://github.com/kyechou/leagueoflegends)
+
+  "SH_IN_CONTAINER: yay -Sy --noconfirm winetricks bash curl openssl samba mesa-utils gnutls lib32-gnutls libldap lib32-libldap openal lib32-openal libpulse lib32-libpulse alsa-lib lib32-alsa-lib mpg123 lib32-mpg123 unixodbc lib32-unixodbc vkd3d lib32-vkd3d vulkan-icd-loader lib32-vulkan-icd-loader",
+  "SH_IN_CONTAINER: yay -Sy --noconfirm vulkan-intel lib32-vulkan-intel vulkan-radeon lib32-vulkan-radeon",
 
 ]
 
