@@ -60,7 +60,7 @@ install_setup_cmds = [
 
   # use yay to install AUR league package!
   "SH_IN_CONTAINER: su league -c 'yay -Sy leagueoflegends'",
-  "SH_IN_CONTAINER: su league -c 'leagueoflegends --install'",
+  "SH_IN_CONTAINER: su league -c 'leagueoflegends install'",
 
   # Addtl stuff for input adjustments
   "SH_IN_CONTAINER: pacman -Sy --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
