@@ -9,7 +9,7 @@ Run
   > # Wine prefix is /home/league/.local/share/leagueoflegends
   > WINEPREFIX=/home/league/.local/share/leagueoflegends wine '/home/league/.local/share/leagueoflegends/drive_c/Riot Games/League of Legends/LeagueClient.exe'
   > # WINEPREFIX=/home/league/.local/share/leagueoflegends /opt/wine-lol/bin/wine64 '/home/league/.local/share/leagueoflegends/drive_c/Riot Games/League of Legends/LeagueClient.exe'
-  > WINEPREFIX=/home/league/.local/share/leagueoflegends /opt/wine-lol/bin/wine '/home/league/.local/share/leagueoflegends/drive_c/Riot Games/League of Legends/LeagueClient.exe'
+  > WINEARCH=win32 WINEPREFIX=/home/league/.local/share/leagueoflegends /opt/wine-lol/bin/wine '/home/league/.local/share/leagueoflegends/drive_c/Riot Games/League of Legends/LeagueClient.exe'
 
 
 '''
