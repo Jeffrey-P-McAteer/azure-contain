@@ -7,6 +7,8 @@ Run
   > su league
   > leagueoflegends [--??]
   > Wine prefix is /home/league/.local/share/leagueoflegends
+  > WINEPREFIX=/home/league/.local/share/leagueoflegends wine './.local/share/leagueoflegends/drive_c/Riot Games/League of Legends/LeagueClient.exe'
+  > 
 
 '''
 
@@ -76,6 +78,9 @@ install_setup_cmds = [
 
   # doesn't fix much, but see https://forum.winehq.org/viewtopic.php?t=36233
   "SH_IN_CONTAINER: su league -c 'leagueoflegends run winetricks -q corefonts'",
+
+  # As of this point we had wine 4.x, hopefully 8.x will fix nonsense?
+  "SH_IN_CONTAINER: su league -c 'yay -Sy wine-staging'",
 
 
 ]
