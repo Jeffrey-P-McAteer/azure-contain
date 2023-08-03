@@ -173,6 +173,16 @@ async fn container_manager(mut path_to_config: String) {
           }
           args.push(nspawn_addtl_arg.to_string());
         }
+
+        // Finally, add on addtl args
+        let sys_args: Vec<String> = std::env::args().collect();
+        if sys_args.len() > 2 {
+          for addtl_arg in &sys_args[2..] {
+            args.push(addtl_arg.to_owned());
+          }
+        }
+
+
       }
       else if container_config.runtime_hint.contains("arch-chroot")  {
 
