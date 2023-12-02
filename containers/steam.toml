@@ -26,8 +26,8 @@ part_subfolder = "containers/steam"
 # If root FS is empty or install flag missing, all of these are run as root.
 install_setup_cmds = [
   # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
-  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.05.03/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
-  
+  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.12.01/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
+
   # Arch will need a good mirror list to install packages with
   "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
 
@@ -47,7 +47,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman-key --init",
   "SH_IN_CONTAINER: pacman -S archlinux-keyring",
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
-  
+
   # Now install packages!
   "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd steam steam-native-runtime ",
 
@@ -60,7 +60,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
 
   "SH_IN_CONTAINER: pacman -S --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber",
-  
+
 
 ]
 
@@ -74,6 +74,11 @@ nspawn_addtl_args = [
   "--bind=/dev/snd",
   "--bind=/tmp",
   "--bind=/dev/nvidia0",
+  "--bind=/dev/nvidia1",
+  "--bind=/dev/nvidiactl",
+  "--bind=/dev/nvidia-modeset",
+  "--bind=/dev/nvidia-uvm",
+  "--bind=/dev/nvidia-uvm-tools",
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
   "--user=steam", # exec as steam user we setup before, we expect it's ID to match our GUI user's ID (1000)
   "--"
