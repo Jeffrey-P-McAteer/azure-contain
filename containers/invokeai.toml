@@ -85,7 +85,7 @@ install_setup_cmds = [
   # Finally install InvokeAI
   "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
   "SH_IN_CONTAINER: sudo -u user mkdir -p /home/user/py-env",
-  "SH_IN_CONTAINER: sudo -u user sh -c 'echo PYTHONPATH=/home/user/py-env >> ~/.bashrc'",
+  "SH_IN_CONTAINER: sudo -u user sh -c 'echo export PYTHONPATH=/home/user/py-env >> ~/.bashrc'",
   "SH_IN_CONTAINER: sudo -u user python -m pip install --target=/home/user/py-env \"InvokeAI[xformers]\" --use-pep517 --extra-index-url https://download.pytorch.org/whl/cu117",
 
   # Addtl packages for GPU
