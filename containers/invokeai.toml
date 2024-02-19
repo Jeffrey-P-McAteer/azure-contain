@@ -24,6 +24,7 @@ Also test for that one .so file we need to replace via
   > python -c 'from patchmatch import patch_match'
   > python -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
 
+  > find /home/user/py-env -iname '*libgomp*so*'
   > find /home/user/.local/lib/python3.10/site-packages/torch -iname '*libgomp*so*'
   > cp /path/to/libgomp-a34b3233.so.1 /path/to/_ORIGINAL_libgomp-a34b3233.so.1
   > rm /path/to/libgomp-a34b3233.so.1
@@ -83,12 +84,14 @@ install_setup_cmds = [
 
   # Finally install InvokeAI
   "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
-  "SH_IN_CONTAINER: sudo -u user python -m pip install --user \"InvokeAI[xformers]\" --use-pep517 --extra-index-url https://download.pytorch.org/whl/cu117",
+  "SH_IN_CONTAINER: sudo -u user mkdir -p /home/user/py-env",
+  "SH_IN_CONTAINER: sudo -u user sh -c 'echo PYTHONPATH=/home/user/py-env >> ~/.bashrc'",
+  "SH_IN_CONTAINER: sudo -u user python -m pip install --target=/home/user/py-env \"InvokeAI[xformers]\" --use-pep517 --extra-index-url https://download.pytorch.org/whl/cu117",
 
   # Addtl packages for GPU
   "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm xf86-video-nouveau stable-diffusion-ui python-opencv opencv \"",
   "SH_IN_CONTAINER: cd /usr/lib/pkgconfig/ ; ln -sf opencv4.pc opencv.pc ", # For pip install below
-  "SH_IN_CONTAINER: sudo -u user python -m pip install --user torch torchvision torchaudio pypatchmatch",
+  "SH_IN_CONTAINER: sudo -u user python -m pip install --target=/home/user/py-env torch torchvision torchaudio pypatchmatch",
 
 
 ]

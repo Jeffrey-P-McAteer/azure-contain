@@ -6,7 +6,7 @@ welcome_msg = '''
 Run once
   > su user
   > cd
-  > ollama
+  > ollama serve &
   > ollama run llama2
   > ollama run llama2:13b
   > ollama run vicuna:33b
