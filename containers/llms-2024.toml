@@ -1,34 +1,32 @@
 
 [container]
-name = "steam"
+name = "llms-2024"
 
 welcome_msg = '''
-Run
-  > su steam
-  > steam-native
-  > steam-native steam://run/440
+Run once
+  > su user
+  > cd
+  > ollama
+  > ollama run llama2
+  > ollama run llama2:13b
+  > ollama run vicuna:33b
+  # See https://ollama.com/library/vicuna/tags
 
 '''
 
-#runtime_hint = "arch-chroot"
-runtime_hint = "nspawn"
-
-# Internal sd disk
-#disk_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
+runtime_hint = "arch-chroot"
 
 # external scratch disk
 disk_partuuids = [
   "e08214f5-cfc5-4252-afee-505dfcd23808"
 ]
 
-# The tool looks up the mount point for disk_partuuid and adds this to the mount location.
-# Disks must be mounted separately from azure-contain.
-part_subfolder = "containers/steam"
+part_subfolder = "containers/llms-2024"
 
 # If root FS is empty or install flag missing, all of these are run as root.
 install_setup_cmds = [
   # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
-  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.12.01/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
+  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2024.02.01/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
 
   # Arch will need a good mirror list to install packages with
   "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
@@ -51,22 +49,30 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
 
   # Now install packages!
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd steam steam-native-runtime ",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel python python-pip nvidia cuda opencl-nvidia ",
 
-  # Setup user 'steam'
-  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel steam",
+  # Setup user 'user'
+  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
   "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
 
-  # Addtl stuff for input adjustments
-  "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
-  "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
+  # We need python 3.10 which is in the AUR
+  "SH_IN_CONTAINER: cd /opt ; git clone https://aur.archlinux.org/yay-git.git ; chown -R user:user /opt/yay-git",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"cd /opt/yay-git ; makepkg -si --noconfirm \"",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm python310 \"",
+  "SH_IN_CONTAINER: rm /usr/bin/python3 ; ln -s /usr/bin/python3.10 /usr/bin/python3 ",
 
-  "SH_IN_CONTAINER: pacman -S --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber",
+  # Addtl packages for GPU
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm xf86-video-nouveau stable-diffusion-ui python-opencv opencv \"",
+  "SH_IN_CONTAINER: cd /usr/lib/pkgconfig/ ; ln -sf opencv4.pc opencv.pc ", # For pip install below
+  "SH_IN_CONTAINER: sudo -u user python -m pip install --user torch torchvision torchaudio pypatchmatch",
 
+  # Finally install Ollama & other llm runtimes!
+  "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
+  "SH_IN_CONTAINER: sudo curl -L https://ollama.com/download/ollama-linux-amd64 -o /usr/bin/ollama",
+  "SH_IN_CONTAINER: sudo chmod +x /usr/bin/ollama",
 
 ]
 
-# Used for permissions + folder bind mounts, added after "systemd-nspawn -D /path/to/root"
 nspawn_addtl_args = [
   "--capability=all",
   # "--capability=CAP_SYS_ADMIN",
@@ -82,12 +88,7 @@ nspawn_addtl_args = [
   "--bind=/dev/nvidia-uvm",
   "--bind=/dev/nvidia-uvm-tools",
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
-  "--user=steam", # exec as steam user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  "--user=user", # exec as user user we setup before, we expect it's ID to match our GUI user's ID (1000)
   "--"
 ]
-
-fwd_env_vars = [
-  "DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS", "XDG_VTNR", "XDG_SESSION_ID"
-]
-
 

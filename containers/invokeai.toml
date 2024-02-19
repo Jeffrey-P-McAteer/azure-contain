@@ -5,12 +5,12 @@ name = "invokeai"
 welcome_msg = '''
 Run once
   > su user
-  > cd 
+  > cd
   > invokeai-configure
 
 Run
   > su user
-  > cd 
+  > cd
   > invokeai --web --host 127.0.0.1
 
 and open a browser to http://localhost:9090
@@ -20,7 +20,7 @@ Also ensure /home/user/.local/bin is on your PATH
   > rsync -av $(find /j/downloads -iname '*.safetensors' -print) /mnt/scratch/containers/invokeai/home/user/addtl-models ; ls -alh /j/downloads /mnt/scratch/containers/invokeai/home/user/addtl-models
 
 Also test for that one .so file we need to replace via
-  
+
   > python -c 'from patchmatch import patch_match'
   > python -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
 
@@ -37,7 +37,9 @@ Also test for that one .so file we need to replace via
 runtime_hint = "arch-chroot"
 
 # external scratch disk
-disk_partuuid = "e08214f5-cfc5-4252-afee-505dfcd23808"
+disk_partuuids = [
+  "e08214f5-cfc5-4252-afee-505dfcd23808"
+]
 
 part_subfolder = "containers/invokeai"
 
@@ -45,7 +47,7 @@ part_subfolder = "containers/invokeai"
 install_setup_cmds = [
   # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
   "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.05.03/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
-  
+
   # Arch will need a good mirror list to install packages with
   "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
 
@@ -65,7 +67,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman-key --init",
   "SH_IN_CONTAINER: pacman -S archlinux-keyring",
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
-  
+
   # Now install packages!
   "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel python python-pip nvidia cuda opencl-nvidia ",
 
@@ -91,5 +93,22 @@ install_setup_cmds = [
 
 ]
 
-
+nspawn_addtl_args = [
+  "--capability=all",
+  # "--capability=CAP_SYS_ADMIN",
+  "--bind=/run/user/1000:/run/user/1000",
+  "--bind=/var/lib/dbus",
+  "--bind=/dev/dri",
+  "--bind=/dev/snd",
+  "--bind=/tmp",
+  "--bind=/dev/nvidia0",
+  "--bind=/dev/nvidia1",
+  "--bind=/dev/nvidiactl",
+  "--bind=/dev/nvidia-modeset",
+  "--bind=/dev/nvidia-uvm",
+  "--bind=/dev/nvidia-uvm-tools",
+  "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
+  "--user=user", # exec as user user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  "--"
+]
 

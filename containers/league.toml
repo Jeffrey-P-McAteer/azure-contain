@@ -21,7 +21,9 @@ runtime_hint = "nspawn"
 #disk_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
 
 # external scratch disk
-disk_partuuid = "e08214f5-cfc5-4252-afee-505dfcd23808"
+disk_partuuids = [
+  "e08214f5-cfc5-4252-afee-505dfcd23808"
+]
 
 # The tool looks up the mount point for disk_partuuid and adds this to the mount location.
 # Disks must be mounted separately from azure-contain.
@@ -31,7 +33,7 @@ part_subfolder = "containers/league"
 install_setup_cmds = [
   # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
   "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2023.06.01/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
-  
+
   # Arch will need a good mirror list to install packages with
   "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
 
@@ -51,7 +53,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman-key --init",
   "SH_IN_CONTAINER: pacman -S archlinux-keyring",
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
-  
+
   # Now install packages!
   "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd git base-devel",
 
@@ -72,7 +74,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
 
   "SH_IN_CONTAINER: pacman -Sy --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber",
-  
+
   # More work done (see https://github.com/kyechou/leagueoflegends)
 
   "SH_IN_CONTAINER: yay -Sy --noconfirm winetricks bash curl openssl samba mesa-utils gnutls lib32-gnutls libldap lib32-libldap openal lib32-openal libpulse lib32-libpulse alsa-lib lib32-alsa-lib mpg123 lib32-mpg123 unixodbc lib32-unixodbc vkd3d lib32-vkd3d vulkan-icd-loader lib32-vulkan-icd-loader",

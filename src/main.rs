@@ -36,7 +36,7 @@ fn main() {
 fn dump_help() {
   println!(r#"Usage:
   {exe} /path/to/container.toml
-    
+
     Runs the Container
 
   {exe} TODO more runtime container control stuff
@@ -63,7 +63,7 @@ async fn container_manager(mut path_to_config: String) {
   let container_config: ContainConfig = toml::from_str(&container_file_content).expect("Could not parse config!");
   // We don't really use outer layer much
   let container_config = container_config.container;
-  
+
   // println!("container_config={:?}", container_config);
 
   // Check if container_config.btrfs_partuuid is mounted, if not exit!
@@ -146,7 +146,7 @@ async fn container_manager(mut path_to_config: String) {
       args.push("-n".to_string()); // for sudo
 
       if container_config.runtime_hint.contains("nspawn") {
-      
+
         args.push("systemd-nspawn".to_string()); // begin nspawn command
         args.push("-D".to_string());
         args.push(ref_to_container_root_dir.to_string());
@@ -202,7 +202,7 @@ async fn container_manager(mut path_to_config: String) {
       println!("");
       println!("{}", &container_config.welcome_msg);
       println!("");
-      
+
 
       dump_error!(
         tokio::process::Command::new("sudo")

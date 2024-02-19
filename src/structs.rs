@@ -15,14 +15,15 @@ pub struct ContainerBlock {
 
   #[serde(default = "default_empty_string")]
   pub welcome_msg: String,
-  
-  // One of nspawn, arch-chroot, 
+
+  // One of nspawn, arch-chroot,
   #[serde(default = "default_runtime_hint")]
   pub runtime_hint: String,
 
-  // Where data is on disk
-  pub disk_partuuid: String,
-  
+  // Where data is on disk; first existing disk in list is used.
+  // This design allows us to support multi-machine configs, and fall-back to other storage devices.
+  pub disk_partuuids: Vec<String>,
+
   // Where it gets mounted; the tool will ensure part_subfolder.parent() == mountpoint of disk_partuuid
   pub part_subfolder: PathBuf,
 
@@ -59,7 +60,13 @@ impl ContainerBlock {
     flag_file_path
   }
   pub fn get_disk_part_path(&self) -> String {
-    format!("/dev/disk/by-partuuid/{}", self.disk_partuuid)
+    for disk_partuuid in &self.disk_partuuids {
+      let maybe_path = format!("/dev/disk/by-partuuid/{}", disk_partuuid);
+      if std::path::Path::new(&maybe_path).exists() {
+        return maybe_path;
+      }
+    }
+    "/DEV/NO_DISK_IN_disk_partuuids_LIST_ATTACHED".to_string()
   }
 }
 
