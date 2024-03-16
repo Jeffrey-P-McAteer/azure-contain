@@ -6,15 +6,22 @@ welcome_msg = '''
 Run once
   > su user
   > cd
-  > invokeai-configure # TODO fix for 2024 builds
+
+  > export INVOKEAI_ROOT=/home/user/invokeai
+  > . /home/user/invokeai/.venv/bin/activate
+  > pip install 'xformers~=0.0.22'
+  > pip install triton
+  > python -m xformers.info output
+
+  > pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 Run
   > su user
   > cd
   > export INVOKEAI_ROOT=/home/user/invokeai
   > . /home/user/invokeai/.venv/bin/activate
-  > invokeai --web --host 127.0.0.1
-
+  > invokeai-web --host 127.0.0.1
+  > # /home/user/invokeai/invoke.sh <<<'1 '
 
 and open a browser to http://localhost:9090
 
