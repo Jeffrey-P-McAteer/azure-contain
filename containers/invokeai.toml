@@ -20,7 +20,10 @@ Run once
   #> make GO_TAGS=stablediffusion BUILD_TYPE=cublas build
   #> # Or GO_TAGS=tinydream
   #> ./local-ai --models-path=/home/user/addtl-models --debug=true
-  > yay -Syu localai-git-cuda # or local-ai
+  #> yay -Syu localai-git-cuda # or local-ai
+
+  # Just download binaries off https://github.com/mudler/LocalAI/releases
+  > /home/user/local-ai-cuda12-Linux-x86_64 --models-path=/home/user/addtl-models --debug=true
 
   > yay -Syu nodejs npm
   > git clone https://github.com/enricoros/big-agi.git
