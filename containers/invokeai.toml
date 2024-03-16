@@ -7,9 +7,20 @@ Run once
   > su user
   > cd
 
-====== Stable Diffucsion Setup Notes ======
+====== LocalAI Setup Notes ======
 
-  >
+  > yay -Syu make cmake base-devel git go
+  > git clone https://github.com/go-skynet/LocalAI
+  > cd LocalAI
+  > make GO_TAGS=stablediffusion BUILD_TYPE=cublas build
+  > # Or GO_TAGS=tinydream
+  > ./local-ai --models-path=/home/user/addtl-models --debug=true
+
+  > yay -Syu nodejs npm
+  > git clone https://github.com/enricoros/big-agi.git
+  > cd big-agi
+  > npm install
+  > npm run dev
 
 
 ====== InvokeAI Setup Notes ======
