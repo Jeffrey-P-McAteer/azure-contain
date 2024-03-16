@@ -13,7 +13,7 @@ Run once
   > pip install triton
   > python -m xformers.info output
 
-  > pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+  > pip install --upgrade --force-reinstall torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 Run
   > su user
