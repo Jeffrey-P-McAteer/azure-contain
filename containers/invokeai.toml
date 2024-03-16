@@ -9,7 +9,7 @@ Run once
 
 ====== LocalAI Setup Notes ======
 
-  > yay -Syu make cmake base-devel git go
+  > yay -Syu make cmake base-devel git go grpc
   > yay -Syu cuda # for cublas
   > git clone https://github.com/go-skynet/LocalAI
   > cd LocalAI
