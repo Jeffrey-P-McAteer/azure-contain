@@ -10,8 +10,11 @@ Run once
 ====== LocalAI Setup Notes ======
 
   > yay -Syu make cmake base-devel git go
+  > yay -Syu cuda # for cublas
   > git clone https://github.com/go-skynet/LocalAI
   > cd LocalAI
+  > export LD_LIBRARY_PATH=/opt/cuda/targets/x86_64-linux/lib/
+  > export CGO_LDFLAGS='-L/opt/cuda/targets/x86_64-linux/lib/'
   > make GO_TAGS=stablediffusion BUILD_TYPE=cublas build
   > # Or GO_TAGS=tinydream
   > ./local-ai --models-path=/home/user/addtl-models --debug=true
