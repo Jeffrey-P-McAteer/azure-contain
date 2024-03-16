@@ -7,6 +7,11 @@ Run once
   > su user
   > cd
 
+====== *** Setup Notes ======
+
+  >
+
+
 ====== LocalAI Setup Notes ======
 
   > yay -Syu make cmake base-devel git go grpc
