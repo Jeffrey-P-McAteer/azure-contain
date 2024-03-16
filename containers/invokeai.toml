@@ -7,6 +7,13 @@ Run once
   > su user
   > cd
 
+====== Stable Diffucsion Setup Notes ======
+
+  >
+
+
+====== InvokeAI Setup Notes ======
+
   > export INVOKEAI_ROOT=/home/user/invokeai
   > . /home/user/invokeai/.venv/bin/activate
   > pip install 'xformers~=0.0.22'
