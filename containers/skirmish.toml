@@ -1,0 +1,93 @@
+
+[container]
+name = "skirmish"
+
+welcome_msg = '''
+Run
+  > su user
+  >
+'''
+
+#runtime_hint = "arch-chroot"
+runtime_hint = "nspawn"
+
+# Internal sd disk
+#disk_partuuid = "8f3ca68c-d031-2d41-849c-be5d9602e920"
+
+# external scratch disk
+disk_partuuids = [
+  "e08214f5-cfc5-4252-afee-505dfcd23808"
+]
+
+# The tool looks up the mount point for disk_partuuid and adds this to the mount location.
+# Disks must be mounted separately from azure-contain.
+part_subfolder = "containers/skirmish"
+
+# If root FS is empty or install flag missing, all of these are run as root.
+install_setup_cmds = [
+  # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
+  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2024.03.29/archlinux-bootstrap-x86_64.tar.gz' | tar xvz -C '{container_root_dir}' --strip-components=1",
+
+  # Arch will need a good mirror list to install packages with
+  "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
+
+  # Enable multilib!
+  "SH_IN_CONTAINER: echo '[multilib]' >> /etc/pacman.conf",
+  "SH_IN_CONTAINER: echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf",
+  # Turn off signature checks
+  "SH_IN_CONTAINER: sed -i \"s/SigLevel.*=.*/SigLevel = Never/g\" /etc/pacman.conf",
+  # Turn off space check
+  "SH_IN_CONTAINER: sed -i \"s/^CheckSpace.*/#CheckSpace/g\" /etc/pacman.conf",
+
+  # Enable utf-8 locale
+  "SH_IN_CONTAINER: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen",
+  "SH_IN_CONTAINER: locale-gen",
+  "SH_IN_CONTAINER: echo 'LANG=\"en_US.UTF-8\"' > /etc/locale.conf",
+
+  "SH_IN_CONTAINER: pacman-key --init",
+  "SH_IN_CONTAINER: pacman -S archlinux-keyring",
+  "SH_IN_CONTAINER: pacman -Syu --noconfirm",
+
+  # Now install packages!
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd ",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm wine wine-gecko wine-mono ",
+
+  # Setup user 'user'
+  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
+  "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
+
+  # Addtl stuff for input adjustments
+  "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
+  "SH_IN_CONTAINER: echo \"allowed_users = anybody\" >> /etc/X11/Xwrapper.config",
+
+  "SH_IN_CONTAINER: pacman -S --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber lib32-pipewire lib32-libpulse  ",
+
+
+]
+
+# Used for permissions + folder bind mounts, added after "systemd-nspawn -D /path/to/root"
+nspawn_addtl_args = [
+  "--capability=all",
+  # "--capability=CAP_SYS_ADMIN",
+  "--bind=/run/user/1000:/run/user/1000",
+  "--bind=/var/lib/dbus",
+  "--bind=/dev/dri",
+  "--bind=/dev/snd",
+  "--bind=/tmp",
+  "--bind=/dev/nvidia0",
+  "--bind=/dev/nvidia1",
+  "--bind=/dev/nvidiactl",
+  "--bind=/dev/nvidia-modeset",
+  "--bind=/dev/nvidia-uvm",
+  "--bind=/dev/nvidia-uvm-tools",
+  "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
+  "--user=user", # exec as user user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  "--"
+]
+
+fwd_env_vars = [
+  "DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS", "XDG_VTNR", "XDG_SESSION_ID",
+  "SWAYSOCK", "WAYLAND_DISPLAY"
+]
+
+
