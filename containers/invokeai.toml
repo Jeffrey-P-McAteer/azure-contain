@@ -75,6 +75,8 @@ Also test for that one .so file we need to replace via
   > sudo ldconfig
   > python -m pip install --user torch torchvision torchaudio pypatchmatch
 
+  > yay -S cuda-10.0
+
 '''
 
 runtime_hint = "arch-chroot"
