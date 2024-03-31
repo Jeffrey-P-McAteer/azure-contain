@@ -5,7 +5,8 @@ name = "foundry"
 welcome_msg = '''
 Run
   > su user
-  >
+  > ./FoundryVTT-11.315/foundryvtt
+
 '''
 
 #runtime_hint = "arch-chroot"
@@ -50,11 +51,6 @@ install_setup_cmds = [
 
   # Now install packages!
   "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd ",
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm wine wine-gecko wine-mono ",
-
-  # Setup user 'user'
-  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
-  "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
 
   # Addtl stuff for input adjustments
   "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
@@ -62,6 +58,12 @@ install_setup_cmds = [
 
   "SH_IN_CONTAINER: pacman -S --noconfirm pipewire pipewire-audio pipewire-alsa pipewire-pulse wireplumber lib32-pipewire lib32-libpulse  ",
 
+  # Setup user 'user'
+  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
+  "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
+
+  # Install foundry-specific packages; See https://wiki.archlinux.org/title/FoundryVTT
+  "SH_IN_CONTAINER: pacman -S --noconfirm nodejs npm nss at-spi2-core libcups gtk3",
 
 ]
 
