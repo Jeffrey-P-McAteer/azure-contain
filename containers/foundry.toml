@@ -50,7 +50,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: pacman -Syu --noconfirm",
 
   # Now install packages!
-  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd ",
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm mesa-utils xterm lib32-mesa sudo vim ttf-liberation lib32-systemd htop ",
 
   # Addtl stuff for input adjustments
   "SH_IN_CONTAINER: pacman -S --noconfirm xorg-server xorg-xinit xorg-server-utils mesa lib32-nvidia-utils nvidia-utils nvidia xf86-video-intel xf86-video-amdgpu",
@@ -84,6 +84,11 @@ nspawn_addtl_args = [
   "--bind=/dev/nvidia-uvm-tools",
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
   "--user=user", # exec as user user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  "--property=MemoryMax=980M",
+  "--property=MemoryLimit=980M",
+  "--property=MemorySwapMax=980M",
+  "--property=CPUAccounting=true",
+  "--property=AllowedCPUs=0", # Only give 1 CPU's worth of exeuction space
   "--"
 ]
 

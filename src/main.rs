@@ -66,6 +66,18 @@ async fn container_manager(mut path_to_config: String) {
 
   // println!("container_config={:?}", container_config);
 
+  // First check if the continer is already running; if so we merely nsenter into it and pass all args || bash
+  if container_is_running(&container_config.name).await {
+    let sys_args: Vec<String> = std::env::args().collect();
+    if sys_args.len() > 2 {
+      nsenter_cmd(&container_config.name, &sys_args[2..]).await;
+    }
+    else {
+      nsenter_cmd(&container_config.name, &["bash".to_string()]).await;
+    }
+    return;
+  }
+
   // Check if container_config.btrfs_partuuid is mounted, if not exit!
   match get_mount_pt_of( &container_config.get_disk_part_path() ).await {
     None => {
@@ -236,4 +248,57 @@ async fn is_mounted(directory_path: &str) -> bool {
   return false;
 }
 
+async fn container_is_running(name: &str) -> bool {
 
+  let output = tokio::process::Command::new("sudo")
+                .args(&["machinectl", "list", "--output=json-pretty"])
+                .stdout(std::process::Stdio::piped())
+                .output()
+                .await;
+
+  let output = output.expect("Could not run machinectl list!");
+
+  let stdout = String::from_utf8(output.stdout).unwrap();
+
+  return stdout.contains(name);
+}
+
+async fn nsenter_cmd(name: &str, cmd: &[String]) {
+  let pid_output = tokio::process::Command::new("sudo")
+                .args(&["machinectl", "show", "--property", "Leader", name])
+                .stdout(std::process::Stdio::piped())
+                .output()
+                .await;
+
+  let pid_output = pid_output.expect("Could not run machinectl show!");
+  let pid_output_str = String::from_utf8(pid_output.stdout).unwrap();
+  let chunks: Vec<&str> = pid_output_str.split("=").collect();
+  if chunks.len() <= 1 {
+    println!("FATAL ERROR, pid_output_str does not contain a PID! pid_output_str = {}", pid_output_str);
+    return;
+  }
+  let pid_str = chunks[1].trim();
+
+  println!("pid_str = {}", pid_str);
+
+  let mut nsenter_args: Vec<String> = vec![];
+  nsenter_args.push("nsenter".to_string());
+  nsenter_args.push(format!("--target={}", pid_str));
+  nsenter_args.push("--mount".to_string());
+  nsenter_args.push("--uts".to_string());
+  nsenter_args.push("--ipc".to_string());
+  nsenter_args.push("--net".to_string());
+  nsenter_args.push("--pid".to_string());
+
+  for c in cmd {
+    nsenter_args.push(c.into());
+  }
+
+  let container_cmd_s = nsenter_args.join(" ");
+  println!("[Run Cmd] sudo {}", container_cmd_s);
+
+  let _ = tokio::process::Command::new("sudo")
+    .args(&nsenter_args)
+    .status()
+    .await;
+}
