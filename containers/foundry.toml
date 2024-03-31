@@ -6,6 +6,7 @@ welcome_msg = '''
 Run
   > su user
   > ./FoundryVTT-11.315/foundryvtt
+  > node $HOME/FoundryVTT-11.315/resources/app/main.js --dataPath=$HOME/.local/share/FoundryVTT/
 
 '''
 
