@@ -6,9 +6,21 @@ welcome_msg = '''
 Run
   > su user
   > cd
+   >> \. /opt/stable-diffusion-ui/installer_files/env/bin/activate
+   >> pip3 install torch torchvision torchaudio
+   >> python -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
+   >> find /opt/stable-diffusion-ui -iname '*libgomp*so*'
+   >> cp /opt/stable-diffusion-ui/installer_files/env/lib/python3.8/site-packages/torch/lib/libgomp-a34b3233.so.1 /opt/stable-diffusion-ui/installer_files/env/lib/python3.8/site-packages/torch/lib/_ORIGINAL_libgomp-a34b3233.so.1
+   >> ln -s /usr/lib/libgomp.so.1 /opt/stable-diffusion-ui/installer_files/env/lib/python3.8/site-packages/torch/lib/libgomp-a34b3233.so.1
+   >> sudo ldconfig
+   >> python -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
+   >> yay -S cuda-11.7
+   >> sudo ldconfig
+   >>
+   >>
+   >>
+   >>
   > stable-diffusion-ui-server
-
-
 
 
 '''
