@@ -27,7 +27,11 @@ Run
    >> python3.11 -m venv /opt/stable-diffusion-web-ui/venv
    >> source /opt/stable-diffusion-web-ui/venv/bin/activate
    >> pip3.11 install wrapt torch torchvision torchaudio
-   >> yay -S bc
+   >>
+   >> yay -S bc python311 python311-pip
+   >> sudo rm /usr/bin/python ; sudo ln -s /usr/bin/python3.11 /usr/bin/python
+   >> rm -rf /opt/stable-diffusion-web-ui/venv
+   >> python3.11 -m venv /opt/stable-diffusion-web-ui/venv
    >> cd "/opt/stable-diffusion-web-ui" && ./webui.sh
    >>
    >>
