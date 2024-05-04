@@ -17,7 +17,8 @@ Run
    >> yay -S cuda-11.7
    >> sudo ldconfig
    >>
-   >>
+   >> yay -S extra-testing/python-pytorch-cuda extra-testing/cudnn
+   >> python3.12 -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
    >>
    >>
   > stable-diffusion-ui-server
