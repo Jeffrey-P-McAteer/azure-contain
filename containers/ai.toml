@@ -16,9 +16,19 @@ Run
    >> python -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
    >> yay -S cuda-11.7
    >> sudo ldconfig
+   >> PYTORCH_NVML_BASED_CUDA_CHECK=1 python -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
    >>
    >> yay -S extra-testing/python-pytorch-cuda extra-testing/cudnn
    >> python3.12 -c 'import torch ; print("GPU detected: ", torch.cuda.is_available())'
+   >>
+   >> # See https://aur.archlinux.org/packages/stable-diffusion-web-ui-git#comment-970957
+   >> yay -S python311
+   >> rm -rf /opt/stable-diffusion-web-ui/venv
+   >> python3.11 -m venv /opt/stable-diffusion-web-ui/venv
+   >> source /opt/stable-diffusion-web-ui/venv/bin/activate
+   >> pip3.11 install wrapt torch torchvision torchaudio
+   >> yay -S bc
+   >> cd "/opt/stable-diffusion-web-ui" && ./webui.sh
    >>
    >>
   > stable-diffusion-ui-server
@@ -81,7 +91,9 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: cd /usr/lib/pkgconfig/ ; ln -sf opencv4.pc opencv.pc ", # For pip install(s) l8ter
 
 
-  "SH_IN_CONTAINER: sudo -u user yay -S --noconfirm stable-diffusion-ui",
+  #"SH_IN_CONTAINER: sudo -u user yay -S --noconfirm stable-diffusion-ui",
+  "SH_IN_CONTAINER: sudo -u user yay -S --noconfirm stable-diffusion-web-ui-git",
+
 
 
 ]
