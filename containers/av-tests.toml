@@ -1,0 +1,67 @@
+
+[container]
+name = "av-tests"
+
+welcome_msg = '''
+Run
+  > su user
+  >
+
+'''
+
+#runtime_hint = "arch-chroot"
+#runtime_hint = "nspawn"
+runtime_hint = "nspawn-boot"
+
+# external scratch disk
+disk_partuuids = [
+  "249fc8ef-dec7-4d11-b80c-965fe8765e26"
+]
+
+part_subfolder = "/tmp/containers/av-tests"
+
+# If root FS is empty or install flag missing, all of these are run as root.
+install_setup_cmds = [
+  # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
+  "wget -qO- 'https://dfw.mirror.rackspace.com/archlinux/iso/2024.10.01/archlinux-bootstrap-x86_64.tar.zst' | tar --zstd -xv -C '{container_root_dir}' --strip-components=1",
+
+  # Arch will need a good mirror list to install packages with
+  "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
+
+  # Turn off signature checks
+  "SH_IN_CONTAINER: sed -i \"s/SigLevel.*=.*/SigLevel = Never/g\" /etc/pacman.conf",
+  # Turn off space check
+  "SH_IN_CONTAINER: sed -i \"s/^CheckSpace.*/#CheckSpace/g\" /etc/pacman.conf",
+
+  # Add needs utf-8 locale
+  "SH_IN_CONTAINER: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen",
+  "SH_IN_CONTAINER: locale-gen",
+  "SH_IN_CONTAINER: echo 'LANG=\"en_US.UTF-8\"' > /etc/locale.conf",
+
+  "SH_IN_CONTAINER: pacman-key --init",
+  "SH_IN_CONTAINER: pacman -S archlinux-keyring",
+  "SH_IN_CONTAINER: pacman -Syu --noconfirm",
+
+  # Now install packages!
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel python python-pip ",
+
+  # Ensure pip is available
+  "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
+
+  # Setup user 'user'
+  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
+  "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
+
+  # We need python 3.10 which is in the AUR
+  "SH_IN_CONTAINER: cd /opt ; git clone https://aur.archlinux.org/yay-git.git ; chown -R user:user /opt/yay-git",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"cd /opt/yay-git ; makepkg -si --noconfirm \"",
+
+  # AUR stuff
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm sonarr radarr \"",
+
+
+
+]
+nspawn_addtl_arg = [
+
+]
