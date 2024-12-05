@@ -1,0 +1,88 @@
+
+[container]
+name = "superresolution"
+
+welcome_msg = '''
+Run
+  > TODO
+
+'''
+
+runtime_hint = "arch-chroot"
+
+# external scratch disk
+disk_partuuids = [
+  "e08214f5-cfc5-4252-afee-505dfcd23808"
+]
+
+part_subfolder = "containers/superresolution"
+
+# If root FS is empty or install flag missing, all of these are run as root.
+install_setup_cmds = [
+  # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
+  "wget -qO- 'https://dfw.mirror.rackspace.com/archlinux/iso/2024.12.01/archlinux-bootstrap-x86_64.tar.zst' | tar --zstd -xv -C '{container_root_dir}' --strip-components=1",
+
+  # Arch will need a good mirror list to install packages with
+  "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
+
+  # Enable multilib!
+  "SH_IN_CONTAINER: echo '[multilib]' >> /etc/pacman.conf",
+  "SH_IN_CONTAINER: echo 'Include = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf",
+  # Turn off signature checks
+  "SH_IN_CONTAINER: sed -i \"s/SigLevel.*=.*/SigLevel = Never/g\" /etc/pacman.conf",
+  # Turn off space check
+  "SH_IN_CONTAINER: sed -i \"s/^CheckSpace.*/#CheckSpace/g\" /etc/pacman.conf",
+
+  # Add needs utf-8 locale
+  "SH_IN_CONTAINER: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen",
+  "SH_IN_CONTAINER: locale-gen",
+  "SH_IN_CONTAINER: echo 'LANG=\"en_US.UTF-8\"' > /etc/locale.conf",
+
+  "SH_IN_CONTAINER: pacman-key --init",
+  "SH_IN_CONTAINER: pacman -S archlinux-keyring",
+  "SH_IN_CONTAINER: pacman -Syu --noconfirm",
+
+  # Now install packages!
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel python python-pip nvidia cuda opencl-nvidia ",
+
+  # Setup user 'user'
+  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel user",
+  "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
+
+  # We need the AUR
+  "SH_IN_CONTAINER: cd /opt ; git clone https://aur.archlinux.org/yay-git.git ; chown -R user:user /opt/yay-git",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"cd /opt/yay-git ; makepkg -si --noconfirm \"",
+
+  # and finally install video2x-git
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm video2x-git \"",
+
+  # Ensure pip is available
+  "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
+
+
+
+]
+
+nspawn_addtl_args = [
+  "--capability=all",
+  # "--capability=CAP_SYS_ADMIN",
+  "--bind=/run/user/1000:/run/user/1000",
+  "--bind=/var/lib/dbus",
+  "--bind=/dev/dri",
+  "--bind=/dev/snd",
+  "--bind=/tmp",
+  "--bind=/dev/nvidia0",
+  "--bind=/dev/nvidia1",
+  "--bind=/dev/nvidiactl",
+  "--bind=/dev/nvidia-modeset",
+  "--bind=/dev/nvidia-uvm",
+  "--bind=/dev/nvidia-uvm-tools",
+  "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
+  "--user=user", # exec as user user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  "--"
+]
+
+# base64.b64decode(b'amFtZXNAam1jYXRlZXIucHc=')
+# jaistuff
+
+
