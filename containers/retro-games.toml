@@ -1,12 +1,11 @@
 
 [container]
-name = "superresolution"
+name = "retro-games"
 
 welcome_msg = '''
 Run
   > su user
-  > video2x --help
-  >
+  > desmume
 
 '''
 
@@ -17,7 +16,7 @@ disk_partuuids = [
   "e08214f5-cfc5-4252-afee-505dfcd23808"
 ]
 
-part_subfolder = "containers/superresolution"
+part_subfolder = "containers/retro-games"
 
 # If root FS is empty or install flag missing, all of these are run as root.
 install_setup_cmds = [
@@ -55,8 +54,8 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: cd /opt ; git clone https://aur.archlinux.org/yay-git.git ; chown -R user:user /opt/yay-git",
   "SH_IN_CONTAINER: sudo -u user sh -c \"cd /opt/yay-git ; makepkg -si --noconfirm \"",
 
-  # and finally install video2x-git
-  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm openmp video2x-git \"",
+  # and finally install desmume
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm openmp desmume \"",
 
   # Ensure pip is available
   "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
@@ -84,7 +83,5 @@ nspawn_addtl_args = [
   "--"
 ]
 
-# base64.b64decode(b'amFtZXNAam1jYXRlZXIucHc=')
-# jaistuff
 
 
