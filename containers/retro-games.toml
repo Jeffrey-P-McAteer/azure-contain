@@ -55,7 +55,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: sudo -u user sh -c \"cd /opt/yay-git ; makepkg -si --noconfirm \"",
 
   # and finally install desmume
-  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm openmp desmume \"",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm desmume \"",
 
   # Ensure pip is available
   "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
