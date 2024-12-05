@@ -69,7 +69,7 @@ install_setup_cmds = [
 
 nspawn_addtl_args = [
   "--capability=all",
-  # "--capability=CAP_SYS_ADMIN",
+  "--capability=CAP_SYS_ADMIN",
   "--bind=/run/user/1000:/run/user/1000",
   "--bind=/var/lib/dbus",
   "--bind=/dev/dri",
@@ -82,6 +82,8 @@ nspawn_addtl_args = [
   "--bind=/dev/nvidia-uvm",
   "--bind=/dev/nvidia-uvm-tools",
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
+  "--bind=/run",
+  "--bind=/sys",
   "--user=user", # exec as user user we setup before, we expect it's ID to match our GUI user's ID (1000)
   "--"
 ]
