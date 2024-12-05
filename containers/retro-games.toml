@@ -61,7 +61,7 @@ install_setup_cmds = [
   "SH_IN_CONTAINER: sudo -u user python -m ensurepip",
 
   # Misc
-  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm pipewire wireplumber\"",
+  "SH_IN_CONTAINER: sudo -u user sh -c \"yay -Sy --noconfirm pipewire wireplumber alsa-utils pipewire-pulse apulse \"",
 
 
 
