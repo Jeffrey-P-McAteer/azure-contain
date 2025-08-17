@@ -1,0 +1,84 @@
+
+[container]
+name = "steam"
+
+welcome_msg = '''
+Run
+  > su claude
+  > cd /j/proj-claude
+  > claude
+
+'''
+
+#runtime_hint = "arch-chroot"
+runtime_hint = "nspawn"
+
+# internal OS dick
+disk_partuuids = [
+  "249fc8ef-dec7-4d11-b80c-965fe8765e26"
+]
+
+# The tool looks up the mount point for disk_partuuid and adds this to the mount location.
+# Disks must be mounted separately from azure-contain.
+part_subfolder = "opt/containers/claude"
+
+# If root FS is empty or install flag missing, all of these are run as root.
+install_setup_cmds = [
+  # By default the tarball has a root.x86_64/ folder which we want the contents of placed at {container_root_dir}
+  "wget -qO- 'http://mirror.adectra.com/archlinux/iso/2025.08.01/archlinux-bootstrap-x86_64.tar.zst' | unzstd | tar xv -C '{container_root_dir}' --strip-components=1",
+
+  # Arch will need a good mirror list to install packages with
+  "cp /etc/pacman.d/mirrorlist '{container_root_dir}'/etc/pacman.d/mirrorlist",
+
+  # Setup utf-8 locale
+  "SH_IN_CONTAINER: echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen",
+  "SH_IN_CONTAINER: locale-gen",
+  "SH_IN_CONTAINER: echo 'LANG=\"en_US.UTF-8\"' > /etc/locale.conf",
+  "SH_IN_CONTAINER: sed -i 's/SigLevel.*/SigLevel = Never/g' /etc/pacman.conf",
+
+  "SH_IN_CONTAINER: pacman-key --init",
+  "SH_IN_CONTAINER: pacman -S archlinux-keyring",
+  "SH_IN_CONTAINER: pacman -Syu --noconfirm",
+
+  # Now install packages!
+  "SH_IN_CONTAINER: pacman -Sy --noconfirm sudo vim git base-devel ",
+
+  # Setup user 'claude'
+  "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel claude",
+  "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
+
+  # Use 'claude' to install yay
+  "SH_IN_CONTAINER: mkdir /opt/yay ; chown claude:claude /opt/yay",
+  "SH_IN_CONTAINER: su claude -c 'git clone https://aur.archlinux.org/yay.git /opt/yay ; cd /opt/yay ; makepkg -si '",
+
+  "SH_IN_CONTAINER: su claude -c 'yay -Sy claude-code'",
+
+
+]
+
+# Used for permissions + folder bind mounts, added after "systemd-nspawn -D /path/to/root"
+nspawn_addtl_args = [
+  "--capability=all",
+  # "--capability=CAP_SYS_ADMIN",
+  "--bind=/run/user/1000:/run/user/1000",
+  "--bind=/var/lib/dbus",
+  "--bind=/dev/dri",
+  "--bind=/dev/snd",
+  "--bind=/tmp",
+  "--bind=/dev/nvidia0",
+  "--bind=/dev/nvidia1",
+  "--bind=/dev/nvidiactl",
+  "--bind=/dev/nvidia-modeset",
+  "--bind=/dev/nvidia-uvm",
+  "--bind=/dev/nvidia-uvm-tools",
+  "--bind=/j/proj-claude", # Give AI agent access to files under /j/proj-claude
+  "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
+  "--user=claude", # exec as claude user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  "--"
+]
+
+fwd_env_vars = [
+  "DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS", "XDG_VTNR", "XDG_SESSION_ID"
+]
+
+
