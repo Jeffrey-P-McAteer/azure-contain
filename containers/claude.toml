@@ -1,6 +1,6 @@
 
 [container]
-name = "steam"
+name = "claude"
 
 welcome_msg = '''
 Run
