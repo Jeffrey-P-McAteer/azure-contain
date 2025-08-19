@@ -226,6 +226,27 @@ async fn container_manager(mut path_to_config: String) {
           args.push(nspawn_addtl_arg.to_string());
         }
 
+        // Set CWD to the outer CWD IF we have a --bind arg OR the file exists within ref_to_container_root_dir
+        if let Ok(host_cwd) = std::env::current_dir() {
+          let host_cwd_s = host_cwd.into_os_string().to_string_lossy().to_string();
+
+          let mut safe_to_join_and_chdir = false;
+          for nspawn_addtl_arg in container_config.nspawn_addtl_args.iter() {
+            if nspawn_addtl_arg.contains(&host_cwd_s) {
+              safe_to_join_and_chdir = true;
+            }
+          }
+
+          let joined_path_str = format!("{}/{}", ref_to_container_root_dir, host_cwd_s);
+          if std::path::PathBuf::from(joined_path_str).exists() {
+            safe_to_join_and_chdir = true; // go for it
+          }
+
+          if safe_to_join_and_chdir {
+            args.push(format!("--chdir={}", &host_cwd_s ));
+          }
+        }
+
         // Finally, add on addtl args
         let sys_args: Vec<String> = std::env::args().collect();
         if sys_args.len() > 2 {
