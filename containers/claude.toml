@@ -5,7 +5,7 @@ name = "claude"
 welcome_msg = '''
 Run
   > su claude
-  > cd /j/proj-claude
+  > cd /j/claude/
   > claude
 
 '''
