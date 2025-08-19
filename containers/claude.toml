@@ -71,7 +71,7 @@ nspawn_addtl_args = [
   "--bind=/dev/nvidia-modeset",
   "--bind=/dev/nvidia-uvm",
   "--bind=/dev/nvidia-uvm-tools",
-  "--bind=/j/proj-claude", # Give AI agent access to files under /j/proj-claude
+  "--bind=/j/claude", # Give AI agent access to files under /j/claude
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
   "--user=claude", # exec as claude user we setup before, we expect it's ID to match our GUI user's ID (1000)
   "--"
