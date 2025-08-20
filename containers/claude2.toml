@@ -1,6 +1,6 @@
 
 [container]
-name = "claude"
+name = "claude2"
 
 welcome_msg = '''
 Run
@@ -20,7 +20,7 @@ disk_partuuids = [
 
 # The tool looks up the mount point for disk_partuuid and adds this to the mount location.
 # Disks must be mounted separately from azure-contain.
-part_subfolder = "opt/containers/claude"
+part_subfolder = "opt/containers/claude2"
 
 # If root FS is empty or install flag missing, all of these are run as root.
 install_setup_cmds = [
