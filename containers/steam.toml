@@ -70,7 +70,7 @@ install_setup_cmds = [
 nspawn_addtl_args = [
   "--capability=all",
   # "--capability=CAP_SYS_ADMIN",
-  "--bind=/run/user/1000:/run/user/1000",
+  "--bind=/run/user/1000",
   "--bind=/var/lib/dbus",
   "--bind=/dev/dri",
   "--bind=/dev/snd",
@@ -154,6 +154,10 @@ nspawn_addtl_args = [
   "--property=DeviceAllow=/dev/hidraw14 rwm",
   "--property=DeviceAllow=/dev/hidraw15 rwm",
   "--property=DeviceAllow=/dev/hidraw16 rwm",
+  "--bind=/dev/input/js0",
+  "--bind=/dev/input/js1",
+  "--bind=/dev/uinput",
+  "--bind=/run/udev",
   "--"
 ]
 
