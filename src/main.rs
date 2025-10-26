@@ -47,7 +47,8 @@ fn dump_help() {
 }
 
 async fn container_manager(mut path_to_config: String) {
-  if ! std::path::Path::new(&path_to_config).exists() {
+  let path_to_config_p = std::path::Path::new(&path_to_config);
+  if ! path_to_config_p.exists() || path_to_config_p.is_dir()  {
     // Scan under /j/bins/azure-contain/containers for a file containing this & use that
     let mut containers_dir_o = dump_error_and_ret!( tokio::fs::read_dir("/j/bins/azure-contain/containers").await );
     while let Some(container_toml) = dump_error_and_ret!( containers_dir_o.next_entry().await ) {
