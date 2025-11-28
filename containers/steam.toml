@@ -70,6 +70,7 @@ install_setup_cmds = [
 nspawn_addtl_args = [
   "--capability=all",
   # "--capability=CAP_SYS_ADMIN",
+  "--cpu-affinity=1-21", # By omitting CPU 0, we can power-down all P-cores and ensure core 0 is not clobbered by high-performance processes
   "--bind=/run/user/1000",
   "--bind=/var/lib/dbus",
   "--bind=/dev/dri",
