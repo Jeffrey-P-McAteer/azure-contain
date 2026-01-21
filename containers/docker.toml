@@ -43,6 +43,7 @@ install_setup_cmds = [
   # Setup user 'docker'
   "SH_IN_CONTAINER: useradd -m -G games,render,input,video,users,dbus,wheel docker",
   "SH_IN_CONTAINER: echo \"%wheel ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/enablewheel",
+  "SH_IN_CONTAINER: echo 'docker:docker' | chpasswd'",
 
   # Use 'docker' to install yay
   "SH_IN_CONTAINER: mkdir /opt/yay ; chown docker:docker /opt/yay",
@@ -71,7 +72,7 @@ nspawn_addtl_args = [
   "--bind=/j/claude", # Give AI agent access to files under /j/claude
   "--bind=/j/downloads", # AI also gets access to this folder, we sometimes write experiments there
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
-  "--user=claude", # exec as claude user we setup before, we expect it's ID to match our GUI user's ID (1000)
+  # "--user=docker",
   "--"
 ]
 
