@@ -58,6 +58,7 @@ install_setup_cmds = [
 nspawn_addtl_args = [
   "--capability=all",
   # "--capability=CAP_SYS_ADMIN",
+  "--private-users=no", # Helps podman
   "--bind=/run/user/1000:/run/user/1000",
   "--bind=/var/lib/dbus",
   "--bind=/dev/dri",

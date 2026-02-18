@@ -71,6 +71,7 @@ nspawn_addtl_args = [
   "--bind=/dev/nvidia-modeset",
   "--bind=/dev/nvidia-uvm",
   "--bind=/dev/nvidia-uvm-tools",
+  "--bind=/run/pcscd/pcscd.comm",
   "--bind=/j/claude", # Give AI agent access to files under /j/claude
   "--bind=/j/downloads", # AI also gets access to this folder, we sometimes write experiments there
   "--bind=/dev/tty2", # used when running from framebuffer to allocate xorg stuffs
